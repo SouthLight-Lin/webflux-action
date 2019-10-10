@@ -31,9 +31,10 @@ public class MyController {
 
     @GetMapping("/index/flux")
     Mono<String> find(){
-        log.info("start");
+        log.info(Thread.currentThread().getName()+":start");
+        // 因为没有流的最终操作，所以不会阻塞Controller这个线程，惰性求值
         Mono<String> res = Mono.fromSupplier(() -> doSomething());
-        log.info("end");
+        log.info(Thread.currentThread().getName()+":end");
         return res;
     }
 
@@ -49,6 +50,7 @@ public class MyController {
     public String doSomething(){
         try {
             TimeUnit.SECONDS.sleep(5);
+            System.out.println("doSomething:"+Thread.currentThread().getName());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

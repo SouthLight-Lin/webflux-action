@@ -26,4 +26,5 @@ public class RouterConfiguration {
             return ServerResponse.ok().body(str, String.class);
         });
     }
+
 }
