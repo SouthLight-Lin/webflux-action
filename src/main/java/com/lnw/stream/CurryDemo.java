@@ -12,9 +12,20 @@ import java.util.function.Function;
  */
 public class CurryDemo {
     public static void main(String[] args) {
-        Function<Integer, Function<Integer, Integer>> fun  =
-                x -> y -> x+y;
+        Function<Integer, Function<Integer, Integer>> fun =
+                x -> y -> x + y;
         System.out.println(fun.apply(1).apply(2));
         System.out.println(fun.apply(1));
+
+        try {
+            new CurryDemo().testError();
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    public void testError() {
+        throw new IllegalArgumentException("can't be null");
     }
 }

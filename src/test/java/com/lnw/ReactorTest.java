@@ -1,12 +1,16 @@
 package com.lnw;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 /**
@@ -100,13 +104,36 @@ public class ReactorTest {
     }
 
     @Test
-    public void testFlatMap(){
+    public void testFlatMap() {
         StepVerifier.create(Flux.just("flux", "mono")
-        .flatMap(s -> Flux.fromArray(s.split("\\s*"))
-        .delayElements(Duration.ofMillis(100)))
-        .doOnNext(System.out::print))
+                .flatMap(s -> Flux.fromArray(s.split("\\s*"))
+                        .delayElements(Duration.ofMillis(100)))
+                .doOnNext(System.out::print))
                 .expectNextCount(8)
                 .verifyComplete();
     }
 
+
+    @Test
+    public void testSchedulers() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Mono.fromCallable(() -> getStringSync())  // 1
+                .subscribeOn(Schedulers.elastic()) // 2
+                .subscribe(s -> {
+                    System.out.println(Thread.currentThread().getName() + " s ");
+                }, null, countDownLatch::countDown);
+        countDownLatch.await(10, TimeUnit.SECONDS);
+
+        // 2 将任务调度到Schedulers内置的弹性线程池执行，弹性线程池会为Callable的执行任务分配一个单独的线程
+
+    }
+
+    private String getStringSync() {
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "Hello, Reactor!";
+    }
 }

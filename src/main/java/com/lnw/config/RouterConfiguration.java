@@ -2,6 +2,7 @@ package com.lnw.config;
 
 import java.time.Duration;
 
+import com.lnw.LoginRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RequestPredicates;
@@ -19,10 +20,11 @@ import reactor.core.publisher.Mono;
 public class RouterConfiguration {
 
     @Bean
-    public RouterFunction<ServerResponse> webFlux(){
+    public RouterFunction<ServerResponse> webFlux() {
         System.out.println("----init-----");
-        return RouterFunctions.route(RequestPredicates.GET("/webFlux"), request -> {
-            Mono<String> str = Mono.just("Hello World").delayElement(Duration.ofMillis(5000));
+        return RouterFunctions.route(RequestPredicates.POST("/webFlux"), request -> {
+            System.out.println(request.bodyToMono(LoginRequest.class));
+            Mono<String> str = Mono.just("Hello World").delayElement(Duration.ofMillis(100));
             return ServerResponse.ok().body(str, String.class);
         });
     }
